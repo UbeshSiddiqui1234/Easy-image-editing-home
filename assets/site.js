@@ -922,7 +922,6 @@
       const tl = gsap.timeline({
         onComplete: () => {
           document.documentElement.classList.remove('is-loading');
-          document.dispatchEvent(new CustomEvent('preloader:done'));
           if (imageInterval) clearInterval(imageInterval);
           gsap.delayedCall(1 * speed, unlockScroll);
         }
@@ -942,16 +941,21 @@
         { opacity: 1, filter: 'blur(0px)', duration: 1 * speed, stagger: 0.05 * speed, ease: 'power2.out' }
       );
 
+      // Exit: the preloader fades out while the hero intro starts underneath it. These used to run one after
+      // the other (content out, then the white backdrop out, then the intro), which left the screen completely
+      // blank for a moment in between.
+      tl.addLabel('exit', '+=' + 2.5 * speed);
+      tl.call(() => document.dispatchEvent(new CustomEvent('preloader:done')), null, 'exit');
+
       tl.to('.preloader > *', {
         opacity: 0,
         filter: 'blur(20px)',
         duration: 1 * speed,
-        delay: 2.5 * speed,
         stagger: 0.05 * speed,
         ease: 'power2.in'
-      });
+      }, 'exit');
 
-      tl.to(preloader, { opacity: 0, duration: 0.6 * speed, ease: 'power2.in' });
+      tl.to(preloader, { opacity: 0, duration: 1 * speed, ease: 'power2.in' }, 'exit');
     };
     onReady(startPreloader, { once: true });
   },
