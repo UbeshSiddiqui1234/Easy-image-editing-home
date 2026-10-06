@@ -236,19 +236,31 @@
       }
 
       let index = 0;
+      let timer = 0;
 
       function cycle() {
         showPattern(index);
 
-        setTimeout(() => {
+        timer = setTimeout(() => {
           index = (index + 1) % states.length;
           showCloud(); 
-          setTimeout(cycle, TOTAL_DURATION * 1000);
+          timer = setTimeout(cycle, TOTAL_DURATION * 1000);
         }, TOTAL_DURATION * 1000 + FIGURE_PAUSE * 1000);
       }
 
-      showCloud(); 
-      setTimeout(cycle, TOTAL_DURATION * 1000);
+      // The grid sits in the footer. This loop used to start at page load and re-tween every dot
+      // (700+ on desktop) forever, even behind the preloader; now it only runs while the grid is near the viewport.
+      let visible = false;
+      new IntersectionObserver(entries => {
+        const now = entries[entries.length - 1].isIntersecting;
+        if (now === visible) return;
+        visible = now;
+        clearTimeout(timer);
+        if (visible) {
+          showCloud(); 
+          timer = setTimeout(cycle, TOTAL_DURATION * 1000);
+        }
+      }, { rootMargin: '300px 0px' }).observe(document.getElementById('dotsField'));
     });
   },
 
@@ -261,9 +273,22 @@
       const MAX_DISTANCE = 200;
       const MIN_SCALE = 0.25;
 
+      // This used to measure every dot on every mousemove anywhere on the page.
+      let fieldVisible = false, queued = false, mouseX = 0, mouseY = 0;
+      new IntersectionObserver(entries => {
+        fieldVisible = entries[entries.length - 1].isIntersecting;
+      }, { rootMargin: '300px 0px' }).observe(document.getElementById('dotsField'));
+
       document.addEventListener("mousemove", (e) => {
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (!fieldVisible || queued) return;
+        queued = true;
+        requestAnimationFrame(update);
+      });
+
+      function update() {
+        queued = false;
 
         dots.forEach(dot => {
           const rect = dot.getBoundingClientRect();
@@ -279,7 +304,7 @@
 
           gsap.to(dot, { scale, duration: 0.2, ease: "power2.out" });
         });
-      });
+      }
     });
   },
 
