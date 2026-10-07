@@ -5965,3 +5965,72 @@ ul, ol {
     bottom: 0;
   }
 }
+
+/* Men / Women / Kids switch in the "AI Fashion Photoshoot" card */
+.ai__head {
+  z-index: 3;
+  flex-flow: column;
+  align-items: flex-start;
+  gap: 1rem;
+  display: flex;
+  position: relative;
+}
+.ai__switch {
+  border: 1px solid var(--fonts-20);
+  background-color: var(--mainbg);
+  border-radius: 99rem;
+  gap: .125rem;
+  padding: .2rem;
+  display: inline-flex;
+}
+.ai__switch-btn {
+  appearance: none;
+  cursor: pointer;
+  color: var(--fonts-64);
+  font-family: var(--_font-family---font-family);
+  font-size: var(--_fonts---title-2);
+  font-weight: var(--_font-family---medium);
+  letter-spacing: -.01313rem;
+  background-color: #0000;
+  border: 0;
+  border-radius: 99rem;
+  padding: .3rem .95rem;
+  line-height: 1.5;
+  transition: background-color .2s, color .2s;
+}
+.ai__switch-btn:hover { color: var(--fonts-100); }
+.ai__switch-btn.is-active {
+  background-color: var(--fonts-100);
+  color: var(--mainbg);
+}
+.ai__switch-btn:focus-visible {
+  outline: 2px solid #ff6b02;
+  outline-offset: 2px;
+}
+/* Tablet: the switch sits on the tag's line, at the right (that corner is free there) */
+@media screen and (max-width: 991px) {
+  .ai__head {
+    flex-flow: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: -.55rem;
+    margin-bottom: -.55rem;
+  }
+}
+/* Phone: the top-right corner holds the round button, so the switch gets its own line and the
+   photo grid and card make room for it (2.25rem each) */
+@media screen and (max-width: 767px) {
+  .ai__head {
+    flex-flow: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: .75rem;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .ai__top { height: 38.75rem; }
+  .ai__grid-alt { top: 7.5rem; }
+}
+.ai__grid, .ai__grid-alt { transition: opacity .25s; }
+.ai__top.is-switching .ai__grid, .ai__top.is-switching .ai__grid-alt { opacity: 0; }

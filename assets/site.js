@@ -1529,6 +1529,93 @@
       });
 
     });
+  },
+
+  // ---- 24 ----
+  function () {
+    // Men / Women / Kids switch in the "AI Fashion Photoshoot" card: swaps the card's images in place,
+    // so the theme (light/dark) pairs and the scroll animations on those images keep working.
+    (function () {
+      const card = document.querySelector('.ai__top');
+      const control = card && card.querySelector('.ai__switch');
+      if (!control) return;
+
+      const GARMENT = {
+        men: "a men's olive leather jacket",
+        women: "a women's cobalt blue blazer",
+        kids: "a kids' yellow hooded jacket"
+      };
+      const altFor = (set, key) => {
+        const g = GARMENT[set];
+        if (key.startsWith('card')) return 'Flat sketch of ' + g;
+        if (key.startsWith('screen')) return 'App view of ' + g + ' on a model from four angles, as a close-up and in four lifestyle scenes';
+        return {
+          m1: 'Model walking in ' + g + ', side view',
+          m2: 'Model wearing ' + g + ', front view',
+          m3: 'Model wearing ' + g + ', back view',
+          m4: 'Close-up of ' + g,
+          m5: g.charAt(0).toUpperCase() + g.slice(1) + ' laid flat',
+          m6: 'Model wearing ' + g + ', three-quarter view'
+        }[key];
+      };
+
+      const slots = Array.from(card.querySelectorAll('.ai__grid-card img, .ai__grid-screen img, .ai__grid-alt img')).map(img => {
+        const src = img.getAttribute('src');
+        const phone = src.match(/grid-mob-0(\d)/);
+        const key = phone
+          ? 'm' + phone[1]
+          : (img.closest('.ai__grid-card') ? 'card' : 'screen') + (/dark/.test(src) ? '-dark' : '-light');
+        return { img, key, men: src };
+      });
+
+      const urlFor = (set, slot) => set === 'men' ? slot.men : '/assets/photoshoot/' + set + '-' + slot.key + '.webp?v=1';
+      // Only wait for images the visitor can see now; the hidden layout/theme variants load when shown.
+      const visible = () => slots.filter(slot => slot.img.offsetParent !== null);
+      const fetched = {};
+      const fetchImage = url => fetched[url] || (fetched[url] = new Promise(done => {
+        const probe = new Image();
+        probe.onload = probe.onerror = done;
+        probe.src = url;
+      }));
+      const preload = set => Promise.all(visible().map(slot => fetchImage(urlFor(set, slot))));
+      const wait = ms => new Promise(done => setTimeout(done, ms));
+
+      let current = 'men';
+      let run = 0;
+
+      async function show(set) {
+        if (set === current || !GARMENT[set]) return;
+        current = set;
+        const id = ++run;
+
+        control.querySelectorAll('[data-shoot]').forEach(button => {
+          const on = button.dataset.shoot === set;
+          button.classList.toggle('is-active', on);
+          button.setAttribute('aria-pressed', String(on));
+        });
+
+        card.classList.add('is-switching');
+        await Promise.all([preload(set), wait(260)]);
+        if (id !== run) return;
+
+        slots.forEach(slot => {
+          slot.img.src = urlFor(set, slot);
+          slot.img.alt = altFor(set, slot.key);
+        });
+        await Promise.all(visible().map(slot => slot.img.decode ? slot.img.decode().catch(() => {}) : null));
+        if (id !== run) return;
+        card.classList.remove('is-switching');
+      }
+
+      control.addEventListener('click', event => {
+        const button = event.target.closest('[data-shoot]');
+        if (button) show(button.dataset.shoot);
+      });
+      // Start fetching the other sets as soon as the visitor reaches for the switch.
+      const warm = () => ['women', 'kids'].forEach(preload);
+      control.addEventListener('pointerenter', warm, { once: true });
+      control.addEventListener('focusin', warm, { once: true });
+    })();
   }
   ];
 
