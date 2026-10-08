@@ -6034,3 +6034,7 @@ ul, ol {
 }
 .ai__grid, .ai__grid-alt { transition: opacity .25s; }
 .ai__top.is-switching .ai__grid, .ai__top.is-switching .ai__grid-alt { opacity: 0; }
+
+/* The step illustrations declare their pixel size in the HTML (so the browser can reserve space);
+   their displayed width is set above, so the height must follow it. */
+.list__main__img-01, .list__main__img-02, .list__main__img-03, .list__main__img-04 { height: auto; }

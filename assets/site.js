@@ -339,6 +339,7 @@
         if(el.__themeBound)return;
         el.__themeBound=true;
         el.addEventListener(isCheckbox(el)?'change':'click',onToggle);
+        if(!isCheckbox(el)) el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onToggle(e)}});
       });
       const init=()=>{
         applyTheme(readInitial(),false);
@@ -1572,19 +1573,29 @@
         const key = phone
           ? 'm' + phone[1]
           : (img.closest('.ai__grid-card') ? 'card' : 'screen') + (/dark/.test(src) ? '-dark' : '-light');
-        return { img, key, men: src };
+        return { img, key, men: { src, srcset: img.getAttribute('srcset') || '' } };
       });
 
-      const urlFor = (set, slot) => set === 'men' ? slot.men : '/assets/photoshoot/' + set + '-' + slot.key + '.webp?v=1';
+      // The app view comes in two widths (the browser picks one); the other images are single files.
+      const sourceFor = (set, slot) => {
+        if (set === 'men') return slot.men;
+        const base = '/assets/photoshoot/' + set + '-' + slot.key;
+        if (!slot.key.startsWith('screen')) return { src: base + '.webp?v=1', srcset: '' };
+        return { src: base + '-1296.avif?v=1', srcset: base + '-1296.avif?v=1 1296w, ' + base + '.avif?v=1 2592w' };
+      };
       // Only wait for images the visitor can see now; the hidden layout/theme variants load when shown.
       const visible = () => slots.filter(slot => slot.img.offsetParent !== null);
       const fetched = {};
-      const fetchImage = url => fetched[url] || (fetched[url] = new Promise(done => {
+      const fetchImage = (slot, source) => fetched[source.src + slot.img.sizes] || (fetched[source.src + slot.img.sizes] = new Promise(done => {
         const probe = new Image();
         probe.onload = probe.onerror = done;
-        probe.src = url;
+        if (source.srcset) {
+          probe.sizes = slot.img.sizes;
+          probe.srcset = source.srcset;
+        }
+        probe.src = source.src;
       }));
-      const preload = set => Promise.all(visible().map(slot => fetchImage(urlFor(set, slot))));
+      const preload = set => Promise.all(visible().map(slot => fetchImage(slot, sourceFor(set, slot))));
       const wait = ms => new Promise(done => setTimeout(done, ms));
 
       let current = 'men';
@@ -1606,7 +1617,10 @@
         if (id !== run) return;
 
         slots.forEach(slot => {
-          slot.img.src = urlFor(set, slot);
+          const source = sourceFor(set, slot);
+          if (source.srcset) slot.img.srcset = source.srcset;
+          else slot.img.removeAttribute('srcset');
+          slot.img.src = source.src;
           slot.img.alt = altFor(set, slot.key);
         });
         await Promise.all(visible().map(slot => slot.img.decode ? slot.img.decode().catch(() => {}) : null));
