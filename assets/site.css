@@ -6038,3 +6038,12 @@ ul, ol {
 /* The step illustrations declare their pixel size in the HTML (so the browser can reserve space);
    their displayed width is set above, so the height must follow it. */
 .list__main__img-01, .list__main__img-02, .list__main__img-03, .list__main__img-04 { height: auto; }
+
+/* Four social links do not fit on one line in the phone menu: wrap them, and give the row the space back */
+@media screen and (max-width: 767px) {
+  .menu__list.is-row {
+    flex-wrap: wrap;
+    row-gap: .25rem;
+  }
+  .menu__item.is-last { padding-top: 1rem; }
+}
