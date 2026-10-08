@@ -876,6 +876,13 @@
       const unlockScroll = () => {
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
+
+        // Arriving from another page with a section link (e.g. /#list): go there now that scrolling works again.
+        let target = null;
+        try {
+          target = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        } catch (e) {}
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
 
       lockScroll();
