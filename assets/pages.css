@@ -194,3 +194,112 @@ body:not(.dark) .header__theme-day { display: flex; }
     margin-top: 1rem;
   }
 }
+
+/* ---- links inside running text */
+.legal__text a, .contact__note a {
+  color: var(--fonts-100);
+  text-underline-offset: .2em;
+}
+
+/* ---- contact form */
+.body { --alert: #ff7a2b; }
+body.dark { --alert: #c63a00; }
+.contact__form {
+  gap: 1.5rem;
+  max-width: 46rem;
+  display: grid;
+}
+.contact__form[hidden], .contact__done[hidden] { display: none; }
+.contact__row {
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  display: grid;
+}
+.contact__field {
+  flex-flow: column;
+  gap: .6rem;
+  min-width: 0;
+  display: flex;
+}
+.contact__label { color: var(--fonts-64); }
+.contact__input {
+  appearance: none;
+  border: 1px solid var(--lines);
+  color: var(--fonts-100);
+  font-family: var(--_font-family---font-family);
+  font-size: var(--_fonts---body-3);
+  font-weight: var(--_font-family---regular);
+  background-color: #0000;
+  border-radius: 1rem;
+  width: 100%;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  line-height: 1.4;
+  transition: border-color .2s;
+}
+.contact__input::placeholder { color: var(--fonts-30); }
+.contact__input:hover { border-color: var(--fonts-30); }
+.contact__input:focus {
+  border-color: var(--fonts-100);
+  outline: none;
+}
+textarea.contact__input {
+  resize: vertical;
+  min-height: 12rem;
+}
+.contact__field.is-invalid .contact__input { border-color: var(--alert); }
+.contact__error {
+  color: var(--alert);
+  font-family: var(--_font-family---font-family);
+  font-size: var(--_fonts---title-2);
+  line-height: 1.4;
+}
+.contact__error:empty { display: none; }
+.contact__trap {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.contact__actions {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  display: flex;
+}
+.contact__submit, .contact__again {
+  appearance: none;
+  cursor: pointer;
+  background-color: var(--fonts-100);
+  color: var(--mainbg);
+  font-family: var(--_font-family---font-family);
+  font-size: var(--_fonts---btn);
+  font-weight: var(--_font-family---regular);
+  letter-spacing: -.02125rem;
+  border: 0;
+  border-radius: 99rem;
+  height: 3rem;
+  padding: 0 1.75rem;
+  line-height: 1.2;
+  transition: background-color .2s, opacity .2s;
+}
+.contact__submit:hover, .contact__again:hover { background-color: #ff6b02; }
+.contact__submit:focus-visible, .contact__again:focus-visible {
+  outline: 2px solid #ff6b02;
+  outline-offset: 3px;
+}
+.contact__submit[disabled] {
+  cursor: progress;
+  opacity: .6;
+}
+.contact__status { color: var(--alert); }
+.contact__status:empty { display: none; }
+/* keep a focused field or the thank-you message clear of the fixed header when the page scrolls to it */
+.contact__input, .contact__done { scroll-margin-top: 9rem; }
+.contact__done:focus { outline: none; }
+.contact__again { margin-top: 2rem; }
+@media screen and (max-width: 767px) {
+  .contact__row { grid-template-columns: 1fr; }
+  .contact__form { gap: 1.25rem; }
+}
